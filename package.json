@@ -1,0 +1,13 @@
+{
+  "name": "quint-any-test-benchmark",
+  "version": "1.0.0",
+  "description": "Benchmark tests for Quint any operator",
+  "scripts": {
+    "test": "mocha test/**/*.spec.js"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "@informalsystems/quint": "*"
+  }
+}
