@@ -14,37 +14,73 @@ describe('Quint Any Tests Benchmarking', function() {
     ];
 
     testCases.forEach(({ name, expectedResult }) => {
-        it(`should run ${name} test multiple times and measure performance`, function() {
+        it(`should run ${name} test multiple times and compare quint vs quint-test performance`, function() {
             const iterations = 10;
-            const results = [];
+            const quintResults = [];
+            const quintTestResults = [];
 
+            // Test original quint
             for (let i = 0; i < iterations; i++) {
                 const start = process.hrtime();
                 
-                // Run the Quint test using the correct command format
                 const output = execSync(
                     `echo '${name}' | quint -r any_test.qnt::anyTest --verbosity=3`,
                     { cwd: path.resolve(__dirname, '..') }
                 ).toString();
 
                 const [seconds, nanoseconds] = process.hrtime(start);
-                const duration = seconds * 1000 + nanoseconds / 1000000; // Convert to milliseconds
+                const duration = seconds * 1000 + nanoseconds / 1000000;
                 
-                results.push(duration);
-
-                // Verify the test result
+                quintResults.push(duration);
                 expect(output.includes('true')).to.equal(expectedResult);
             }
 
-            // Calculate statistics
-            const avg = results.reduce((a, b) => a + b, 0) / results.length;
-            const min = Math.min(...results);
-            const max = Math.max(...results);
+            // Test quint-test
+            for (let i = 0; i < iterations; i++) {
+                const start = process.hrtime();
+                
+                const output = execSync(
+                    `echo '${name}' | quint-test -r any_test.qnt::anyTest --verbosity=3`,
+                    { cwd: path.resolve(__dirname, '..') }
+                ).toString();
+
+                const [seconds, nanoseconds] = process.hrtime(start);
+                const duration = seconds * 1000 + nanoseconds / 1000000;
+                
+                quintTestResults.push(duration);
+                expect(output.includes('true')).to.equal(expectedResult);
+            }
+
+            // Calculate statistics for quint
+            const quintAvg = quintResults.reduce((a, b) => a + b, 0) / quintResults.length;
+            const quintMin = Math.min(...quintResults);
+            const quintMax = Math.max(...quintResults);
+
+            // Calculate statistics for quint-test
+            const quintTestAvg = quintTestResults.reduce((a, b) => a + b, 0) / quintTestResults.length;
+            const quintTestMin = Math.min(...quintTestResults);
+            const quintTestMax = Math.max(...quintTestResults);
+
+            // Calculate differences
+            const avgDiff = ((quintTestAvg - quintAvg) / quintAvg * 100).toFixed(2);
+            const minDiff = ((quintTestMin - quintMin) / quintMin * 100).toFixed(2);
+            const maxDiff = ((quintTestMax - quintMax) / quintMax * 100).toFixed(2);
 
             console.log(`\nPerformance results for ${name}:`);
-            console.log(`  Average: ${avg.toFixed(2)}ms`);
-            console.log(`  Min: ${min.toFixed(2)}ms`);
-            console.log(`  Max: ${max.toFixed(2)}ms`);
+            console.log('\nQuint (original):');
+            console.log(`  Average: ${quintAvg.toFixed(2)}ms`);
+            console.log(`  Min: ${quintMin.toFixed(2)}ms`);
+            console.log(`  Max: ${quintMax.toFixed(2)}ms`);
+            
+            console.log('\nQuint-test:');
+            console.log(`  Average: ${quintTestAvg.toFixed(2)}ms`);
+            console.log(`  Min: ${quintTestMin.toFixed(2)}ms`);
+            console.log(`  Max: ${quintTestMax.toFixed(2)}ms`);
+
+            console.log('\nDifference (% change):');
+            console.log(`  Average: ${avgDiff}%`);
+            console.log(`  Min: ${minDiff}%`);
+            console.log(`  Max: ${maxDiff}%`);
         });
     });
 });
