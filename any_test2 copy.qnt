@@ -1,34 +1,51 @@
 module anyTest {
+    // State variable to track our count
+    var count: int
+
+    // Initialize the counter to 0
+    action init = {
+        count' = 0
+    }
+
+    // Increment the counter by 1
+    action increment = {
+        count' = count + 1
+    }
+
+    action wait = {
+        init.then(10.reps(i => increment))
+    }
+
     action a1 = {
-        true
+        wait
     }
 
     action a2 = {
-        true
+        wait
     }
 
     action a3 = {
-        true
+        wait
     }
 
     action a4 = {
-        true
+        wait
     }
 
     action a5 = {
-        false
+        wait
     }
 
     action a6 = {
-        false
+        wait
     }
 
     action a7 = {
-        false
+        wait
     }
 
     action a8 = {
-        false
+        wait
     }
 
     run allAny = {
